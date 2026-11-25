@@ -390,6 +390,7 @@
     business: "",
     demo: null,
     noSpeechCount: 0,
+    unclear: 0,
     startedAt: 0,
     exchanges: 0
   };
@@ -404,21 +405,49 @@
     p.className = "tx tx-" + who;
     var tag = document.createElement("span");
     tag.className = "mono tx-tag";
-    tag.textContent = who === "agent" ? "AGENT" : "YOU";
+    tag.textContent = who === "agent" ? "AGENT:" : "YOU:";
     p.appendChild(tag);
     p.appendChild(document.createTextNode(text));
     transcriptEl.appendChild(p);
     transcriptEl.scrollTop = transcriptEl.scrollHeight;
   }
 
+  /* Pick the most natural-sounding English voice the browser has.
+     The first voice in the list is usually the robotic system default,
+     so rank them: Google's UK voices first, then other natural en-GB
+     voices, then any en-GB, then en-US. Cached once voices load. */
+  var cachedVoice = null;
+  function scoreVoice(v) {
+    var name = (v.name || "").toLowerCase();
+    var lang = (v.lang || "").toLowerCase();
+    if (name.indexOf("google uk english male") !== -1) return 100;
+    if (name.indexOf("google uk english female") !== -1) return 95;
+    if (name.indexOf("google uk english") !== -1) return 90;
+    if (lang.indexOf("en-gb") === 0 && name.indexOf("natural") !== -1) return 85;
+    if (lang.indexOf("en-gb") === 0 && /daniel|ryan|sonia|libby|maisie|arthur|brian|amy/.test(name)) return 80;
+    if (lang.indexOf("en-gb") === 0) return 70;
+    if (name.indexOf("google us english") !== -1) return 60;
+    if (lang.indexOf("en") === 0 && name.indexOf("natural") !== -1) return 55;
+    if (lang.indexOf("en") === 0) return 50;
+    return 0;
+  }
   function pickVoice() {
     if (!synth) return null;
+    if (cachedVoice) return cachedVoice;
     var voices = synth.getVoices();
     if (!voices.length) return null;
-    var gb = voices.filter(function (v) { return (v.lang || "").toLowerCase().indexOf("en-gb") === 0; });
-    if (gb.length) return gb[0];
-    var en = voices.filter(function (v) { return (v.lang || "").toLowerCase().indexOf("en") === 0; });
-    return en.length ? en[0] : voices[0];
+    var best = null, bestScore = -1;
+    voices.forEach(function (v) {
+      var s = scoreVoice(v);
+      if (s > bestScore) { bestScore = s; best = v; }
+    });
+    cachedVoice = best;
+    return best;
+  }
+  /* Voices load asynchronously — refresh the pick when they arrive,
+     otherwise the first greeting can fall back to the default voice. */
+  if (synth && synth.addEventListener) {
+    synth.addEventListener("voiceschanged", function () { cachedVoice = null; pickVoice(); });
   }
 
   function speak(text, onDone) {
@@ -436,7 +465,7 @@
       var u = new SpeechSynthesisUtterance(text);
       var voice = pickVoice();
       if (voice) u.voice = voice;
-      u.rate = 1;
+      u.rate = 0.95;
       u.pitch = 1;
       var done = false;
       var finish = function () {
@@ -544,6 +573,22 @@
     return null;
   }
 
+  /* A short greeting with no real content ("hey, what's up?") is not an
+     answer — say hello back and re-ask the current question instead of
+     treating the greeting as the business or the bottleneck. */
+  function isGreetingOnly(lower) {
+    if (lower.length > 40) return false;
+    if (!/(^|\b)(hi|hello|hey|yo|what'?s up|how'?s it going|how are you|good (morning|afternoon|evening))\b/.test(lower)) return false;
+    if (/\b(company|business|we|run|sell|plumb|shop|store|agency|farm|clinic|restaurant|deal|email|call|service|work|miss|inbox)\b/.test(lower)) return false;
+    return true;
+  }
+  function currentQuestion() {
+    if (state.step === 1) return "So — what does your business do?";
+    if (state.step === 2) return "What eats most of your team's time right now? Missed calls, replying to messages, chasing leads, or something else?";
+    if (state.step === 3) return "How do you handle that today — by hand, with a tool, or does it mostly not get done?";
+    return "Shall I book you in for the free AI audit? Just say yes or no.";
+  }
+
   function handleUser(text) {
     if (!state.active) return;
     state.exchanges++;
@@ -558,11 +603,15 @@
       speak(lastAgentLine, afterAgent);
       return;
     }
+    if (isGreetingOnly(lower)) {
+      speak("Hey, good to hear from you. " + currentQuestion(), afterAgent);
+      return;
+    }
 
     if (state.step === 1) {
       state.business = text;
       state.step = 2;
-      speak("Got it — " + text + ". What eats most of your team's time right now? Missed calls, replying to messages, chasing leads, or something else?", afterAgent);
+      speak("Got it. What eats most of your team's time right now? Missed calls, replying to messages, chasing leads, or something else?", afterAgent);
       return;
     }
     if (state.step === 2) {
@@ -577,12 +626,13 @@
     }
     if (state.step === 3) {
       state.step = 4;
+      state.unclear = 0;
       var d = DEMOS[state.demo];
       speak("Then here is the fit: " + d.name + " — " + d.blurb + " You can try it right now on this page. Shall I book you in for the free AI audit, so we can map the rest? Just say yes or no.", afterAgent);
       return;
     }
     if (state.step === 4) {
-      if (/\b(yes|sure|ok|okay|please|book)/.test(lower)) {
+      if (/\b(yes|sure|ok|okay|please|book)\b/.test(lower)) {
         state.step = 5;
         auditEl.hidden = false;
         speak("Done — the booking link is right here in the call panel. Fill in the form and we will take it from there. Thanks for calling Ussari Labs.", function () {
@@ -590,14 +640,36 @@
         });
         return;
       }
-      if (/\b(no|not now|later|no thanks)\b/.test(lower)) {
+      if (/\b(no|not now|later|no thanks|not yet)\b/.test(lower)) {
         state.step = 5;
         speak("No problem. The three demos are on this page whenever you want them, and the audit form is too. Thanks for calling Ussari Labs.", function () {
           setTimeout(function () { if (state.active) endCall("Call ended. The demos and the audit form are on this page whenever you want them."); }, 800);
         });
         return;
       }
-      speak("Just say yes if you would like the free audit booked, or no if not yet.", afterAgent);
+      /* Anything else is not a yes or a no — explain, don't loop.
+         "I don't have anything to audit" is the common one: the audit
+         is of how the business runs, not of a system they own. */
+      state.unclear++;
+      if (/what.*audit|audit.*what|don'?t have (any|much)|nothing to audit|no.*audit|what should|what do you/.test(lower)) {
+        if (state.unclear >= 2) {
+          state.step = 5;
+          speak("No worries at all — there is nothing for you to prepare. The demos are right here on the page, and the inbox triage one is the closest fit for what you described. Have a look whenever you like. Thanks for calling Ussari Labs.", function () {
+            setTimeout(function () { if (state.active) endCall("Call ended. The demos are on this page whenever you want them."); }, 800);
+          });
+          return;
+        }
+        speak("Fair question — the audit is not of a system you own. We look at how your business actually runs day to day — the emails, the calls, the follow-ups — and map where time leaks. Nothing for you to prepare. Want me to book that in, or would you rather just try the inbox demo?", afterAgent);
+        return;
+      }
+      if (state.unclear >= 2) {
+        state.step = 5;
+        speak("No worries at all — the demos are right here on this page, and the inbox triage one is the closest fit for what you described. Have a look whenever you like. Thanks for calling Ussari Labs.", function () {
+          setTimeout(function () { if (state.active) endCall("Call ended. The demos are on this page whenever you want them."); }, 800);
+        });
+        return;
+      }
+      speak("No rush — just say yes if you would like the free audit booked, or no if not yet. Or say end call, and the demos stay here on the page.", afterAgent);
       return;
     }
     speak("I can help with that — tell me what your business does, and what eats your team's time, and I will point you to the right demo. Or say end call to finish.", afterAgent);
@@ -615,6 +687,7 @@
     state.business = "";
     state.demo = null;
     state.noSpeechCount = 0;
+    state.unclear = 0;
     state.startedAt = Date.now();
     state.exchanges = 0;
     transcriptEl.innerHTML = "";
