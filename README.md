@@ -9,9 +9,16 @@ rounding, no shadows.
 
 | File | Purpose |
 | --- | --- |
+| `images/` | Product screenshots and labelled preview renders for the Work showcase (see below) |
 | `index.html` | The whole site: hero, pillars, about, services, sectors, work/proof, founder, contact |
 | `styles.css` | All styling. Tokens are the five guideline colours; nothing else |
 | `mark.svg` | The three-block "U" mark (favicon). Also inlined in the header/footer |
+
+## Work showcase images (added 25 Nov 2026)
+
+- **Real captures:** `images/vibe-audit-report.png` (top section of a real generated audit report, 0/100 F) and `images/hims-frontend.png` (dev frontend sign-in screen, hmis-web.pages.dev). Both labelled "Screenshot" on the page.
+- **Labelled preview renders (NOT screenshots):** `images/clearledger-preview.svg` and `images/eos-preview.svg` are drawn from the real Compose UI code (colours, layout, labels, worked numbers); `images/harness-preview.svg` is drawn from verified metrics (199 tracked / 32 enabled). The harness dashboard was not running and the EOS tool site URL 404s, so no live capture exists for either — do not present the previews as screenshots.
+- The Work section is a 5-slide carousel (prev/next, product list, counter, keyboard arrows, no auto-advance), each slide with full detail in an expandable section. Brand rules still apply: no radius, gradient or shadow anywhere.
 
 ## Brand tokens (definitive — do not change without the founders)
 
