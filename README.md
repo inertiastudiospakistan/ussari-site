@@ -9,16 +9,17 @@ rounding, no shadows.
 
 | File | Purpose |
 | --- | --- |
-| `images/` | Product screenshots and labelled preview renders for the Work showcase (see below) |
-| `index.html` | The whole site: hero, pillars, about, services, sectors, work/proof, founder, contact |
+| `images/` | One kept product image: the cropped Vibe-Audit banner (see below). No preview renders, no other screenshots. |
+| `index.html` | The whole site: header, auto hero slider, hero intro, pillars, about, services, sectors, work/proof, founder, contact |
 | `styles.css` | All styling. Tokens are the five guideline colours; nothing else |
 | `mark.svg` | The three-block "U" mark (favicon). Also inlined in the header/footer |
 
-## Work showcase images (added 25 Nov 2026)
+## Hero slider + Work section (rebuilt 25 Nov 2026 on user feedback)
 
-- **Real captures:** `images/vibe-audit-report.png` (top section of a real generated audit report, 0/100 F) and `images/hims-frontend.png` (dev frontend sign-in screen, hmis-web.pages.dev). Both labelled "Screenshot" on the page.
-- **Labelled preview renders (NOT screenshots):** `images/clearledger-preview.svg` and `images/eos-preview.svg` are drawn from the real Compose UI code (colours, layout, labels, worked numbers); `images/harness-preview.svg` is drawn from verified metrics (199 tracked / 32 enabled). The harness dashboard was not running and the EOS tool site URL 404s, so no live capture exists for either — do not present the previews as screenshots.
-- The Work section is a 5-slide carousel (prev/next, product list, counter, keyboard arrows, no auto-advance), each slide with full detail in an expandable section. Brand rules still apply: no radius, gradient or shadow anywhere.
+- The old giant Work carousel is gone. The top of the page is now a compact **auto hero slider** (420px desktop / 480px mobile, auto-advances every 5s, pauses on hover/focus and when the tab is hidden, no auto-advance with prefers-reduced-motion, arrows + dots inside the frame, left/right keyboard support). One slide per product; only Vibe-Audit has an image.
+- **Removed 25 Nov 2026** (user: "remove the shitty ones"): `images/clearledger-preview.svg`, `images/eos-preview.svg`, `images/harness-preview.svg` (labelled preview renders that looked fake) and `images/hims-frontend.png` (just a sign-in screen). All four files deleted from the repo — do not re-add any preview render or fake screenshot.
+- **Kept, cropped:** `images/vibe-audit-banner.png` — the real audit-report screenshot cropped to 1200×500 (score card + plain-English summary only), shown on the Vibe-Audit hero slide only. The tall 1280×1500 original was deleted.
+- The Work section below is now **compact grid cards** (name, one line, 2–3 verified numbers, links, expandable Full detail) with no images and no prev/next.
 
 ## Brand tokens (definitive — do not change without the founders)
 
