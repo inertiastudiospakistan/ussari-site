@@ -265,6 +265,35 @@
         <a href="demos/receptionist/">AI receptionist — simulate a missed call, book the job</a>
         <a href="demos/triage/">Inbox / CRM triage — paste a message, see it classified and filed</a>
       </p>
+
+      <div class="call-agent" id="call-agent">
+        <h3 class="automation-subhead">Talk to our AI agent</h3>
+        <p class="section-intro">This is the kind of agent we build for businesses — it answers, asks the right questions, and books the next step. Press call and talk to it. It speaks in your browser; if your browser has no voice, type instead — it works the same.</p>
+        <p class="call-start-row"><button class="btn btn-primary" id="call-start-btn" type="button">Call our AI agent</button></p>
+        <div class="call-panel" id="call-panel" hidden>
+          <div class="call-head">
+            <p class="mono call-title">USSARI AI AGENT</p>
+            <p class="mono call-status" id="call-status">IDLE</p>
+            <p class="mono call-demo-tag">DEMO</p>
+          </div>
+          <div class="call-transcript" id="call-transcript" aria-live="polite"></div>
+          <p class="mono call-hint" id="call-hint"></p>
+          <div class="call-controls">
+            <button type="button" class="btn call-btn-dark" id="call-mute-btn">Mute mic</button>
+            <button type="button" class="btn btn-primary" id="call-end-btn">End call</button>
+          </div>
+          <form class="call-type" id="call-type-form">
+            <label class="mono" for="call-type-input">Type instead — works in any browser</label>
+            <div class="call-type-row">
+              <input id="call-type-input" type="text" autocomplete="off" placeholder="Type your reply…">
+              <button type="submit" class="btn btn-primary">Send</button>
+            </div>
+          </form>
+          <p class="mono call-note">Demo — rule-based voice agent running in your browser. A live deployment uses an LLM and a real phone number; the client pays usage (~$0.13–0.14/min). No call leaves your browser.</p>
+          <p class="call-audit" id="call-audit" hidden><a class="btn btn-primary" href="https://forms.gle/pKDLBtsbxF8gc8SB7" target="_blank" rel="noopener">Book the free AI audit</a></p>
+        </div>
+      </div>
+
       <ul class="proof-list automation-offer">
         <li><span>$500</span> paid pilot — 50% upfront</li>
         <li><span>2 weeks</span> — one workflow, recorded result</li>
@@ -324,7 +353,345 @@
   </div>
 </footer>
 
+<button class="call-fab mono" id="call-fab" type="button">Call our AI agent</button>
 
+<script>
+/* ============================================================
+   USSARI AI AGENT — demo voice agent (rule-based, in-browser)
+   Voice in/out: Web Speech API (speechSynthesis + SpeechRecognition).
+   No backend, no accounts, no data leaves the browser.
+   If voice is unavailable the text box below does the same job.
+   ============================================================ */
+(function () {
+  "use strict";
+
+  var panel = document.getElementById("call-panel");
+  var startBtn = document.getElementById("call-start-btn");
+  var fab = document.getElementById("call-fab");
+  var statusEl = document.getElementById("call-status");
+  var transcriptEl = document.getElementById("call-transcript");
+  var hintEl = document.getElementById("call-hint");
+  var muteBtn = document.getElementById("call-mute-btn");
+  var endBtn = document.getElementById("call-end-btn");
+  var typeForm = document.getElementById("call-type-form");
+  var typeInput = document.getElementById("call-type-input");
+  var auditEl = document.getElementById("call-audit");
+
+  var synth = ("speechSynthesis" in window) ? window.speechSynthesis : null;
+  var Recog = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+  var voiceSupported = !!synth;
+  var recogSupported = !!Recog;
+
+  var state = {
+    active: false,
+    step: 0,          // 0 greeting -> 1 business -> 2 bottleneck -> 3 handling -> 4 audit offer -> 5 done
+    muted: false,
+    speaking: false,
+    business: "",
+    demo: null,
+    noSpeechCount: 0,
+    startedAt: 0,
+    exchanges: 0
+  };
+  var recog = null;
+  var lastAgentLine = "";
+
+  function setStatus(text) { statusEl.textContent = text; }
+  function setHint(text) { hintEl.textContent = text; }
+
+  function addLine(who, text) {
+    var p = document.createElement("p");
+    p.className = "tx tx-" + who;
+    var tag = document.createElement("span");
+    tag.className = "mono tx-tag";
+    tag.textContent = who === "agent" ? "AGENT" : "YOU";
+    p.appendChild(tag);
+    p.appendChild(document.createTextNode(text));
+    transcriptEl.appendChild(p);
+    transcriptEl.scrollTop = transcriptEl.scrollHeight;
+  }
+
+  function pickVoice() {
+    if (!synth) return null;
+    var voices = synth.getVoices();
+    if (!voices.length) return null;
+    var gb = voices.filter(function (v) { return (v.lang || "").toLowerCase().indexOf("en-gb") === 0; });
+    if (gb.length) return gb[0];
+    var en = voices.filter(function (v) { return (v.lang || "").toLowerCase().indexOf("en") === 0; });
+    return en.length ? en[0] : voices[0];
+  }
+
+  function speak(text, onDone) {
+    lastAgentLine = text;
+    addLine("agent", text);
+    if (!synth || state.muted) {
+      setStatus(state.active ? "ON CALL — TEXT ONLY" : "CALL ENDED");
+      if (onDone) onDone();
+      return;
+    }
+    state.speaking = true;
+    setStatus("SPEAKING…");
+    try {
+      synth.cancel();
+      var u = new SpeechSynthesisUtterance(text);
+      var voice = pickVoice();
+      if (voice) u.voice = voice;
+      u.rate = 1;
+      u.pitch = 1;
+      var done = false;
+      var finish = function () {
+        if (done) return;
+        done = true;
+        state.speaking = false;
+        if (onDone) onDone();
+      };
+      u.onend = finish;
+      u.onerror = finish;
+      /* Safety net: some browsers never fire onend (no voice engine).
+         Never leave the call stuck in SPEAKING. */
+      setTimeout(finish, Math.min(30000, 5000 + text.length * 120));
+      synth.speak(u);
+    } catch (e) {
+      state.speaking = false;
+      if (onDone) onDone();
+    }
+  }
+
+  function listen() {
+    if (!state.active || state.muted || !recogSupported) return;
+    if (!recog) {
+      try {
+        recog = new Recog();
+        recog.lang = "en-GB";
+        recog.interimResults = false;
+        recog.maxAlternatives = 1;
+      } catch (e) {
+        recog = null;
+        setHint("Voice input could not start in this browser — type below, it works the same.");
+        return;
+      }
+      recog.onresult = function (ev) {
+        var text = "";
+        for (var i = ev.resultIndex; i < ev.results.length; i++) {
+          if (ev.results[i].isFinal) text += ev.results[i][0].transcript;
+        }
+        text = text.trim();
+        if (text) {
+          state.noSpeechCount = 0;
+          handleUser(text);
+        }
+      };
+      recog.onerror = function (ev) {
+        if (ev.error === "not-allowed" || ev.error === "service-not-allowed") {
+          setHint("Microphone access was denied — no problem, type your replies below and the agent will still answer.");
+        } else if (ev.error === "no-speech") {
+          state.noSpeechCount++;
+          if (state.noSpeechCount >= 2) {
+            setHint("I did not catch that — try speaking again, or type below.");
+            state.noSpeechCount = 0;
+            return;
+          }
+        } else if (ev.error === "audio-capture") {
+          setHint("No microphone was found — type your replies below and the agent will still answer.");
+          return;
+        } else {
+          return;
+        }
+        if (state.active && !state.muted) listenSoon();
+      };
+      recog.onend = function () {
+        if (state.active && !state.muted && !state.speaking) listenSoon();
+      };
+    }
+    try {
+      setStatus("LISTENING…");
+      recog.start();
+    } catch (e) {
+      /* start() throws if already started — ignore */
+    }
+  }
+
+  var listenTimer = null;
+  function listenSoon() {
+    if (listenTimer) clearTimeout(listenTimer);
+    listenTimer = setTimeout(listen, 400);
+  }
+
+  function afterAgent() {
+    if (!state.active) return;
+    if (state.muted) {
+      setStatus("ON CALL — MUTED, TYPE BELOW");
+      return;
+    }
+    if (recogSupported) {
+      listenSoon();
+    } else {
+      setStatus("ON CALL — TYPE BELOW");
+    }
+  }
+
+  var DEMOS = {
+    receptionist: { name: "the AI receptionist", link: "demos/receptionist/", blurb: "it answers every missed call, takes the details, and books the job." },
+    seo: { name: "the SEO automation", link: "demos/seo-audit/", blurb: "it finds the keyword gaps, checks every page, and builds the briefs." },
+    triage: { name: "the inbox and CRM triage", link: "demos/triage/", blurb: "it reads every message, sorts it, drafts the reply, and files it." }
+  };
+
+  function detectDemo(text) {
+    var t = text.toLowerCase();
+    if (/miss(ed)?\s*call|phone|answer(ing)?\s*(the\s*)?phone|call(ers?|ing)|booking|appointment|schedule|reception/.test(t)) return "receptionist";
+    if (/seo|google|rank|search|website\s*traffic|keyword|content|blog/.test(t)) return "seo";
+    if (/inbox|email|message|reply|whatsapp|dm|complaint|follow[- ]?up|lead/.test(t)) return "triage";
+    return null;
+  }
+
+  function handleUser(text) {
+    if (!state.active) return;
+    state.exchanges++;
+    addLine("you", text);
+    var lower = text.toLowerCase();
+
+    if (/^(end|stop|hang up|goodbye|bye|quit)\b/.test(lower) || lower.indexOf("end the call") !== -1) {
+      endCall("You ended the call. Thanks for trying the demo — the three working demos are just above.");
+      return;
+    }
+    if (/repeat|say (that|it) again/.test(lower) && lastAgentLine) {
+      speak(lastAgentLine, afterAgent);
+      return;
+    }
+
+    if (state.step === 1) {
+      state.business = text;
+      state.step = 2;
+      speak("Got it — " + text + ". What eats most of your team's time right now? Missed calls, replying to messages, chasing leads, or something else?", afterAgent);
+      return;
+    }
+    if (state.step === 2) {
+      var demo = detectDemo(text);
+      state.demo = demo || "triage";
+      state.step = 3;
+      var ask = demo
+        ? "That is exactly what we automate. How do you handle it today — by hand, with a tool, or does it mostly not get done?"
+        : "Understood. How do you handle that today — by hand, with a tool, or does it mostly not get done?";
+      speak(ask, afterAgent);
+      return;
+    }
+    if (state.step === 3) {
+      state.step = 4;
+      var d = DEMOS[state.demo];
+      speak("Then here is the fit: " + d.name + " — " + d.blurb + " You can try it right now on this page. Shall I book you in for the free AI audit, so we can map the rest? Just say yes or no.", afterAgent);
+      return;
+    }
+    if (state.step === 4) {
+      if (/\b(yes|sure|ok|okay|please|book)/.test(lower)) {
+        state.step = 5;
+        auditEl.hidden = false;
+        speak("Done — the booking link is right here in the call panel. Fill in the form and we will take it from there. Thanks for calling Ussari Labs.", function () {
+          setTimeout(function () { if (state.active) endCall("Audit booked — the form link is in the panel. Thanks for calling Ussari Labs."); }, 800);
+        });
+        return;
+      }
+      if (/\b(no|not now|later|no thanks)\b/.test(lower)) {
+        state.step = 5;
+        speak("No problem. The three demos are on this page whenever you want them, and the audit form is too. Thanks for calling Ussari Labs.", function () {
+          setTimeout(function () { if (state.active) endCall("Call ended. The demos and the audit form are on this page whenever you want them."); }, 800);
+        });
+        return;
+      }
+      speak("Just say yes if you would like the free audit booked, or no if not yet.", afterAgent);
+      return;
+    }
+    speak("I can help with that — tell me what your business does, and what eats your team's time, and I will point you to the right demo. Or say end call to finish.", afterAgent);
+  }
+
+  function startCall() {
+    if (state.active) {
+      panel.scrollIntoView({ behavior: "smooth", block: "start" });
+      typeInput.focus();
+      return;
+    }
+    state.active = true;
+    state.step = 1;
+    state.muted = false;
+    state.business = "";
+    state.demo = null;
+    state.noSpeechCount = 0;
+    state.startedAt = Date.now();
+    state.exchanges = 0;
+    transcriptEl.innerHTML = "";
+    auditEl.hidden = true;
+    panel.hidden = false;
+    fab.textContent = "On call — tap to view";
+    muteBtn.textContent = "Mute mic";
+    startBtn.textContent = "Call in progress…";
+    startBtn.disabled = true;
+    panel.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (!voiceSupported && !recogSupported) {
+      setHint("Voice is not available in this browser — the agent will answer in writing. Type your replies below.");
+    } else if (!recogSupported) {
+      setHint("This browser can speak but cannot listen — the agent will talk, and you reply by typing below.");
+    } else {
+      setHint("Speak when the status says listening, or type below — either works.");
+    }
+    setStatus("CALLING…");
+    speak("Hello, this is the Ussari Labs AI agent. Thanks for calling. Before anything else — what does your business do?", afterAgent);
+    typeInput.focus();
+  }
+
+  function endCall(note) {
+    if (!state.active) return;
+    state.active = false;
+    state.speaking = false;
+    try { if (synth) synth.cancel(); } catch (e) {}
+    try { if (recog) recog.abort(); } catch (e) {}
+    if (listenTimer) clearTimeout(listenTimer);
+    setStatus("CALL ENDED");
+    setHint("");
+    var mins = Math.max(1, Math.round((Date.now() - state.startedAt) / 60000));
+    addLine("agent", (note || "Call ended.") + " (" + state.exchanges + " exchanges, about " + mins + " minute" + (mins === 1 ? "" : "s") + ".)");
+    startBtn.textContent = "Call our AI agent";
+    startBtn.disabled = false;
+    fab.textContent = "Call our AI agent";
+  }
+
+  startBtn.addEventListener("click", startCall);
+  fab.addEventListener("click", function () {
+    if (state.active) {
+      panel.scrollIntoView({ behavior: "smooth", block: "start" });
+      typeInput.focus();
+    } else {
+      startCall();
+    }
+  });
+  endBtn.addEventListener("click", function () { endCall("Call ended. Thanks for trying the demo."); });
+  muteBtn.addEventListener("click", function () {
+    state.muted = !state.muted;
+    if (state.muted) {
+      try { if (synth) synth.cancel(); } catch (e) {}
+      try { if (recog) recog.abort(); } catch (e) {}
+      state.speaking = false;
+      muteBtn.textContent = "Unmute mic";
+      setStatus("ON CALL — MUTED, TYPE BELOW");
+      setHint("Microphone muted — type your replies below.");
+    } else {
+      muteBtn.textContent = "Mute mic";
+      setHint("Microphone back on — speak when the status says listening, or type below.");
+      afterAgent();
+    }
+  });
+  typeForm.addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var text = typeInput.value.trim();
+    if (!text) return;
+    typeInput.value = "";
+    if (!state.active) {
+      setHint("Press “Call our AI agent” first to start the demo call.");
+      return;
+    }
+    handleUser(text);
+    typeInput.focus();
+  });
+})();
+</script>
 
 </body>
 </html>

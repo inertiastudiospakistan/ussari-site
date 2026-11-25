@@ -356,6 +356,87 @@ a:focus-visible, .btn:focus-visible {
 .automation-offer li:first-child { border-left: none; }
 .automation-cta { margin: 2.5rem 0 0; }
 
+/* ---------- Talk to our AI agent (voice demo) ---------- */
+
+.call-agent { margin-top: 3rem; border: 1px solid var(--slate); padding: 32px; }
+.call-agent .automation-subhead { margin-top: 0; }
+.call-start-row { margin: 1.5rem 0 0; }
+
+.call-panel {
+  margin-top: 1.5rem;
+  background: var(--white);
+  color: var(--charcoal);
+  border: 1px solid var(--slate);
+  padding: 24px;
+}
+.call-head {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--charcoal);
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+.call-head p { margin: 0; }
+.call-title { font-size: 0.9rem; }
+.call-status { color: var(--crimson); }
+.call-demo-tag {
+  margin-left: auto;
+  color: var(--white);
+  background: var(--charcoal);
+  padding: 2px 8px;
+}
+.call-transcript {
+  max-height: 280px;
+  overflow-y: auto;
+  background: var(--alabaster);
+  border: 1px solid var(--charcoal);
+  padding: 16px;
+  min-height: 120px;
+}
+.call-transcript .tx { margin: 0 0 0.75rem; font-size: 0.98rem; }
+.call-transcript .tx:last-child { margin-bottom: 0; }
+.tx-tag { color: var(--crimson); margin-right: 8px; }
+.tx-you .tx-tag { color: var(--charcoal); }
+.call-hint { color: var(--slate); margin: 0.75rem 0 0; min-height: 1.2em; }
+.call-controls { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 1rem; }
+.call-controls .btn { padding: 10px 20px; font-size: 0.9rem; }
+.call-btn-dark { background: transparent; color: var(--charcoal); border: 1px solid var(--charcoal); }
+.call-btn-dark:hover, .call-btn-dark:focus-visible { background: var(--charcoal); color: var(--white); }
+.call-type { margin-top: 1.25rem; }
+.call-type label { display: block; color: var(--charcoal); margin-bottom: 0.5rem; }
+.call-type-row { display: flex; gap: 12px; }
+.call-type-row input {
+  flex: 1;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--charcoal);
+  background: var(--white);
+  border: 1px solid var(--charcoal);
+  border-radius: 0;
+  padding: 10px 14px;
+  min-width: 0;
+}
+.call-type-row input:focus { outline: 2px solid var(--crimson); outline-offset: 2px; }
+.call-type-row .btn { padding: 10px 20px; font-size: 0.9rem; }
+.call-note { color: var(--slate); margin: 1.25rem 0 0; font-size: 0.72rem; line-height: 1.5; }
+.call-audit { margin: 1.25rem 0 0; }
+
+/* Fixed call control — bottom right, always reachable */
+.call-fab {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 20;
+  background: var(--white);
+  color: var(--charcoal);
+  border: 1px solid var(--charcoal);
+  padding: 12px 16px;
+  cursor: pointer;
+}
+.call-fab:hover, .call-fab:focus-visible { background: var(--crimson); border-color: var(--crimson); color: var(--white); outline: 2px solid var(--crimson); outline-offset: 2px; }
+
 /* ---------- Founder ---------- */
 
 .founder-grid {
@@ -415,6 +496,9 @@ a:focus-visible, .btn:focus-visible {
   .why-grid article:nth-child(3) { border-left: none; }
   .why-grid article:nth-child(n+3) { border-top: var(--border); }
   .service-grid { grid-template-columns: 1fr; }
+  .call-agent { padding: 20px; }
+  .call-panel { padding: 16px; }
+  .call-fab { right: 16px; bottom: 16px; padding: 10px 12px; }
   .sector-grid { grid-template-columns: repeat(2, 1fr); }
   .founder-grid { grid-template-columns: 1fr; }
   .founder-card + .founder-card { border-left: none; border-top: var(--border); }
