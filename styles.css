@@ -381,6 +381,8 @@ a:focus-visible, .btn:focus-visible {
 .call-head p { margin: 0; }
 .call-title { font-size: 0.9rem; }
 .call-status { color: var(--crimson); }
+.call-mode { color: var(--charcoal); }
+.call-mode-scripted { color: var(--crimson); }
 .call-demo-tag {
   margin-left: auto;
   color: var(--white);
@@ -421,6 +423,9 @@ a:focus-visible, .btn:focus-visible {
 .call-type-row input:focus { outline: 2px solid var(--crimson); outline-offset: 2px; }
 .call-type-row .btn { padding: 10px 20px; font-size: 0.9rem; }
 .call-note { color: var(--slate); margin: 1.25rem 0 0; font-size: 0.72rem; line-height: 1.5; }
+.call-demo-link { margin: 1rem 0 0; }
+.call-demo-link a { color: var(--charcoal); text-decoration: underline; text-underline-offset: 3px; }
+.call-demo-link a:hover, .call-demo-link a:focus-visible { color: var(--crimson); }
 .call-audit { margin: 1.25rem 0 0; }
 
 /* Fixed call control — bottom right, always reachable */

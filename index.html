@@ -274,6 +274,7 @@
           <div class="call-head">
             <p class="mono call-title">USSARI AI AGENT</p>
             <p class="mono call-status" id="call-status">IDLE</p>
+            <p class="mono call-mode" id="call-mode">AI MODE</p>
             <p class="mono call-demo-tag">DEMO</p>
           </div>
           <div class="call-transcript" id="call-transcript" aria-live="polite"></div>
@@ -289,7 +290,8 @@
               <button type="submit" class="btn btn-primary">Send</button>
             </div>
           </form>
-          <p class="mono call-note">Demo — rule-based voice agent running in your browser. A live deployment uses an LLM and a real phone number; the client pays usage (~$0.13–0.14/min). No call leaves your browser.</p>
+          <p class="call-demo-link" id="call-demo-link" hidden>Try it now: <a id="call-demo-link-a" href="demos/triage/">Try the demo</a></p>
+          <p class="mono call-note">Demo — a real AI agent when the free endpoint answers, rule-based when it is busy. Your words are sent as chat text to a free AI endpoint (OVH AI Endpoints, no account) and nothing else leaves your browser. A live deployment uses an LLM and a real phone number; the client pays usage (~$0.13–0.14/min).</p>
           <p class="call-audit" id="call-audit" hidden><a class="btn btn-primary" href="https://forms.gle/pKDLBtsbxF8gc8SB7" target="_blank" rel="noopener">Book the free AI audit</a></p>
         </div>
       </div>
@@ -357,9 +359,12 @@
 
 <script>
 /* ============================================================
-   USSARI AI AGENT — demo voice agent (rule-based, in-browser)
+   USSARI AI AGENT — demo voice agent, AI-first.
    Voice in/out: Web Speech API (speechSynthesis + SpeechRecognition).
-   No backend, no accounts, no data leaves the browser.
+   Brain: OVH AI Endpoints (keyless, OpenAI-compatible), called
+   straight from the browser — no backend, no accounts, no keys.
+   If the free endpoint is busy on every model, the call falls back
+   to the scripted flow below and says so on the panel.
    If voice is unavailable the text box below does the same job.
    ============================================================ */
 (function () {
@@ -376,6 +381,9 @@
   var typeForm = document.getElementById("call-type-form");
   var typeInput = document.getElementById("call-type-input");
   var auditEl = document.getElementById("call-audit");
+  var modeEl = document.getElementById("call-mode");
+  var demoLinkEl = document.getElementById("call-demo-link");
+  var demoLinkA = document.getElementById("call-demo-link-a");
 
   var synth = ("speechSynthesis" in window) ? window.speechSynthesis : null;
   var Recog = window.SpeechRecognition || window.webkitSpeechRecognition || null;
@@ -384,9 +392,12 @@
 
   var state = {
     active: false,
-    step: 0,          // 0 greeting -> 1 business -> 2 bottleneck -> 3 handling -> 4 audit offer -> 5 done
+    step: 0,          // scripted fallback only: 0 unknown -> 1 business -> 2 bottleneck -> 3 handling -> 4 audit offer -> 5 done
     muted: false,
     speaking: false,
+    thinking: false,  // an LLM request is in flight
+    pendingTurns: 0,  // user turns typed while thinking — answered next
+    aiMode: true,
     business: "",
     demo: null,
     noSpeechCount: 0,
@@ -557,6 +568,13 @@
 
   function afterAgent() {
     if (!state.active) return;
+    /* The caller typed more while the AI was thinking — answer that
+       turn now, with the full history in hand. */
+    if (state.pendingTurns > 0 && !state.thinking) {
+      state.pendingTurns = 0;
+      var t = lastUserText();
+      if (t) { askAIReply(t); return; }
+    }
     if (state.muted) {
       setStatus("ON CALL — MUTED, TYPE BELOW");
       return;
@@ -566,6 +584,161 @@
     } else {
       setStatus("ON CALL — TYPE BELOW");
     }
+  }
+
+  /* ============================================================
+     THE AI — OVH AI Endpoints, OpenAI-compatible, KEYLESS.
+     No key, no account, no backend: the browser calls the public
+     endpoint directly. Each model has its own rate bucket, so on
+     429 / error we try the next one. If every model fails, the call
+     falls back to the scripted flow below and says so on the panel.
+     Never put a key in this page — it is public on GitHub Pages.
+     ============================================================ */
+  var LLM_URL = "https://oai.endpoints.kepler.ai.cloud.ovh.net/v1/chat/completions";
+  var LLM_MODELS = [
+    "DeepSeek-V4.1-Flash-1017",
+    "Qwen3.8-27B",
+    "Meta-Llama-3_3-70B-Instruct",
+    "Mistral-Small-3.2-24B-Instruct-2506",
+    "gpt-oss-120b"
+  ];
+  var LLM_SYSTEM = "You are the Ussari Labs AI agent, on a live demo call with a business owner. You are an AI, never claim to be human. Reply in short spoken words: 1 to 3 sentences, plain language, no lists, no markdown. Find out what their business does, what eats their team's time, and how they handle it today. If they go off topic, answer them naturally and steer gently back to their business. Do not pitch the free audit in every reply — offer it only when it fits, after you have found their bottleneck, and only book it if they say yes. Suggest a fitting Ussari demo by name when it fits: the AI receptionist for missed calls and booking, inbox and CRM triage for emails and messages, SEO automation for Google and rankings. All three can be tried right here on this page. If they ask what the audit is, explain it is a look at how their business actually runs day to day, nothing to prepare. Never invent clients, results, testimonials or prices. The only numbers you may quote are the $500 pilot (50% upfront, 2 weeks) and voice usage about $0.13 to $0.14 a minute, paid by the client. If the caller agrees to the audit, end your reply with [SHOW_AUDIT]. If the call should close, end with [END_CALL]. When you recommend a demo, end with [DEMO: receptionist] or [DEMO: seo] or [DEMO: triage]. The bracketed tokens are instructions for the page, never say them aloud.";
+  var history = [];   // {role, content} — user + assistant turns, last ~10
+
+  function lastUserText() {
+    for (var i = history.length - 1; i >= 0; i--) {
+      if (history[i].role === "user") return history[i].content;
+    }
+    return "";
+  }
+
+  function setMode(mode) {
+    state.aiMode = (mode === "ai");
+    modeEl.textContent = mode === "ai" ? "AI MODE" : "SCRIPTED MODE";
+    modeEl.title = mode === "ai"
+      ? "Replies are generated by a live AI model."
+      : "Free AI endpoint busy — answers are rule-based.";
+    if (modeEl.classList) modeEl.classList.toggle("call-mode-scripted", mode !== "ai");
+  }
+
+  function showDemoLink(key) {
+    var d = DEMOS[key];
+    if (!d) return;
+    demoLinkA.href = d.link;
+    demoLinkA.textContent = "Try the " + d.name + " demo";
+    demoLinkEl.hidden = false;
+  }
+
+  function parseMarkers(raw) {
+    var actions = { audit: false, end: false, demo: null };
+    var text = raw;
+    if (/\[SHOW_AUDIT\]/.test(text)) actions.audit = true;
+    if (/\[END_CALL\]/.test(text)) actions.end = true;
+    var dm = text.match(/\[DEMO:\s*(receptionist|seo|triage)\]/i);
+    if (dm) actions.demo = dm[1].toLowerCase();
+    text = text.replace(/\[(SHOW_AUDIT|END_CALL|DEMO:\s*(?:receptionist|seo|triage))\]/gi, "").replace(/\s{2,}/g, " ").trim();
+    return { text: text, actions: actions };
+  }
+
+  /* One chat-completions call, trying each model in turn until one
+     answers. done(rawText) on success, done(null) when all fail. */
+  function askAI(done) {
+    var msgs = [{ role: "system", content: LLM_SYSTEM }].concat(history.slice(-10));
+    var i = 0;
+    function tryNext() {
+      if (i >= LLM_MODELS.length) { done(null); return; }
+      var model = LLM_MODELS[i++];
+      var ctrl = ("AbortController" in window) ? new AbortController() : null;
+      var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 20000);
+      var settled = false;
+      function fail() { if (settled) return; settled = true; clearTimeout(timer); tryNext(); }
+      var body = JSON.stringify({ model: model, messages: msgs, temperature: 0.7, max_tokens: 150 });
+      try {
+        fetch(LLM_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: body,
+          signal: ctrl ? ctrl.signal : undefined
+        }).then(function (r) {
+          if (!r.ok) { fail(); return null; }
+          return r.json();
+        }).then(function (data) {
+          if (settled || !data) return;
+          var c = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+          if (c && c.trim()) { settled = true; clearTimeout(timer); done(c); }
+          else fail();
+        }).catch(function () { fail(); });
+      } catch (e) { fail(); }
+    }
+    tryNext();
+  }
+
+  function bookAudit() {
+    state.step = 5;
+    auditEl.hidden = false;
+    speak("Done — the booking link is right here in the call panel. Fill in the form and we will take it from there. Thanks for calling Ussari Labs.", function () {
+      setTimeout(function () { if (state.active) endCall("Audit booked — the form link is in the panel. Thanks for calling Ussari Labs."); }, 800);
+    });
+  }
+
+  function declineAudit() {
+    state.step = 5;
+    speak("No problem. The three demos are on this page whenever you want them, and the audit form is too. Thanks for calling Ussari Labs.", function () {
+      setTimeout(function () { if (state.active) endCall("Call ended. The demos and the audit form are on this page whenever you want them."); }, 800);
+    });
+  }
+
+  /* The AI path for one user turn. `text` is the turn that triggered it;
+     anything typed while thinking is already in history and gets
+     answered next, via afterAgent. */
+  function askAIReply(text) {
+    if (!state.active || state.thinking) return;
+    state.thinking = true;
+    setStatus("THINKING…");
+    askAI(function (raw) {
+      state.thinking = false;
+      if (!state.active) return;
+      if (raw === null) {
+        /* Free endpoint busy on every model — scripted fallback for
+           this turn, and say so on the panel. Never fake AI. */
+        setMode("scripted");
+        setHint("Free AI endpoint is busy right now — answers are rule-based for this turn.");
+        scriptedReply(text);
+        return;
+      }
+      var parsed = parseMarkers(raw);
+      if (!parsed.text && !parsed.actions.audit && !parsed.actions.end && !parsed.actions.demo) {
+        setMode("scripted");
+        scriptedReply(text);
+        return;
+      }
+      setMode("ai");
+      if (parsed.actions.demo) { state.demo = parsed.actions.demo; showDemoLink(parsed.actions.demo); }
+      else { var d2 = detectDemo(parsed.text); if (d2) { state.demo = d2; showDemoLink(d2); } }
+      /* Safety net stays armed only right after an audit offer. */
+      var auditOffer = /audit/i.test(parsed.text) && /\?|shall|would you|want (me|you)|book|sign (you|me) up/i.test(parsed.text);
+      state.step = auditOffer ? 4 : 0;
+      var line = parsed.text;
+      if (!line) line = parsed.actions.audit ? "Done — the booking link is right here in the call panel." : "Thanks for calling Ussari Labs.";
+      history.push({ role: "assistant", content: line });
+      if (history.length > 10) history = history.slice(-10);
+      if (parsed.actions.audit) {
+        state.step = 5;
+        auditEl.hidden = false;
+        speak(line, function () {
+          setTimeout(function () { if (state.active) endCall("Audit booked — the form link is in the panel. Thanks for calling Ussari Labs."); }, 800);
+        });
+        return;
+      }
+      if (parsed.actions.end) {
+        state.step = 5;
+        speak(line, function () {
+          setTimeout(function () { if (state.active) endCall("Call ended. The demos and the audit form are on this page whenever you want them."); }, 800);
+        });
+        return;
+      }
+      speak(line, afterAgent);
+    });
   }
 
   var DEMOS = {
@@ -612,15 +785,47 @@
       speak(lastAgentLine, afterAgent);
       return;
     }
-    if (isGreetingOnly(lower)) {
-      speak("Hey, good to hear from you. " + currentQuestion(), afterAgent);
-      return;
+
+    /* Safety net: the agent just offered the audit and the caller gave
+       a short yes or no — book or decline it even if the model forgot
+       its marker. Longer replies go to the AI, they may mean more. */
+    if (state.step === 4 && lower.length < 25) {
+      if (/\b(yes|sure|ok|okay|please|book)\b/.test(lower) && !/\b(no|not|never)\b/.test(lower)) { bookAudit(); return; }
+      if (/\b(no|not now|later|no thanks|not yet)\b/.test(lower)) { declineAudit(); return; }
     }
 
+    history.push({ role: "user", content: text });
+    if (history.length > 10) history = history.slice(-10);
+    if (state.thinking) { state.pendingTurns++; return; }
+    askAIReply(text);
+  }
+
+  /* Scripted reply — used only when the free AI endpoint is busy on
+     every model. Same flow as the old agent, kept as the honest
+     fallback: no echo, audit explained once, graceful end. */
+  function sayScripted(text, onDone) {
+    history.push({ role: "assistant", content: text });
+    if (history.length > 10) history = history.slice(-10);
+    speak(text, onDone);
+  }
+
+  function scriptedReply(text) {
+    var lower = text.toLowerCase();
+    if (isGreetingOnly(lower)) {
+      sayScripted("Hey, good to hear from you. " + currentQuestion(), afterAgent);
+      return;
+    }
+    if (state.step === 0) {
+      state.step = state.business ? 2 : 1;
+      sayScripted(state.business
+        ? "Understood — and what eats most of your team's time right now?"
+        : "No problem — what does your business do?", afterAgent);
+      return;
+    }
     if (state.step === 1) {
       state.business = text;
       state.step = 2;
-      speak("Got it. What eats most of your team's time right now? Missed calls, replying to messages, chasing leads, or something else?", afterAgent);
+      sayScripted("Got it. What eats most of your team's time right now? Missed calls, replying to messages, chasing leads, or something else?", afterAgent);
       return;
     }
     if (state.step === 2) {
@@ -630,32 +835,19 @@
       var ask = demo
         ? "That is exactly what we automate. How do you handle it today — by hand, with a tool, or does it mostly not get done?"
         : "Understood. How do you handle that today — by hand, with a tool, or does it mostly not get done?";
-      speak(ask, afterAgent);
+      sayScripted(ask, afterAgent);
       return;
     }
     if (state.step === 3) {
       state.step = 4;
       state.unclear = 0;
       var d = DEMOS[state.demo];
-      speak("Then here is the fit: " + d.name + " — " + d.blurb + " You can try it right now on this page. Shall I book you in for the free AI audit, so we can map the rest? Just say yes or no.", afterAgent);
+      sayScripted("Then here is the fit: " + d.name + " — " + d.blurb + " You can try it right now on this page. Shall I book you in for the free AI audit, so we can map the rest? Just say yes or no.", afterAgent);
       return;
     }
     if (state.step === 4) {
-      if (/\b(yes|sure|ok|okay|please|book)\b/.test(lower)) {
-        state.step = 5;
-        auditEl.hidden = false;
-        speak("Done — the booking link is right here in the call panel. Fill in the form and we will take it from there. Thanks for calling Ussari Labs.", function () {
-          setTimeout(function () { if (state.active) endCall("Audit booked — the form link is in the panel. Thanks for calling Ussari Labs."); }, 800);
-        });
-        return;
-      }
-      if (/\b(no|not now|later|no thanks|not yet)\b/.test(lower)) {
-        state.step = 5;
-        speak("No problem. The three demos are on this page whenever you want them, and the audit form is too. Thanks for calling Ussari Labs.", function () {
-          setTimeout(function () { if (state.active) endCall("Call ended. The demos and the audit form are on this page whenever you want them."); }, 800);
-        });
-        return;
-      }
+      if (/\b(yes|sure|ok|okay|please|book)\b/.test(lower)) { bookAudit(); return; }
+      if (/\b(no|not now|later|no thanks|not yet)\b/.test(lower)) { declineAudit(); return; }
       /* Anything else is not a yes or a no — explain, don't loop.
          "I don't have anything to audit" is the common one: the audit
          is of how the business runs, not of a system they own.
@@ -665,28 +857,27 @@
       if (/what.*audit|audit.*what|don'?t have (any|much)|nothing to audit|no.*audit|what should|what do you/.test(lower)) {
         if (state.auditExplained) {
           state.step = 5;
-          speak("No worries at all — there is nothing for you to prepare. The demos are right here on the page, and the inbox triage one is the closest fit for what you described. Have a look whenever you like. Thanks for calling Ussari Labs.", function () {
+          sayScripted("No worries at all — there is nothing for you to prepare. The demos are right here on the page, and the inbox triage one is the closest fit for what you described. Have a look whenever you like. Thanks for calling Ussari Labs.", function () {
             setTimeout(function () { if (state.active) endCall("Call ended. The demos are on this page whenever you want them."); }, 800);
           });
           return;
         }
         state.auditExplained = true;
-        speak("Fair question — the audit is not of a system you own. We look at how your business actually runs day to day — the emails, the calls, the follow-ups — and map where time leaks. Nothing for you to prepare. Want me to book that in, or would you rather just try the inbox demo?", afterAgent);
+        sayScripted("Fair question — the audit is not of a system you own. We look at how your business actually runs day to day — the emails, the calls, the follow-ups — and map where time leaks. Nothing for you to prepare. Want me to book that in, or would you rather just try the inbox demo?", afterAgent);
         return;
       }
       if (state.unclear >= 2) {
         state.step = 5;
-        speak("No worries at all — the demos are right here on this page, and the inbox triage one is the closest fit for what you described. Have a look whenever you like. Thanks for calling Ussari Labs.", function () {
+        sayScripted("No worries at all — the demos are right here on the page, and the inbox triage one is the closest fit for what you described. Have a look whenever you like. Thanks for calling Ussari Labs.", function () {
           setTimeout(function () { if (state.active) endCall("Call ended. The demos are on this page whenever you want them."); }, 800);
         });
         return;
       }
-      speak("No rush — just say yes if you would like the free audit booked, or no if not yet. Or say end call, and the demos stay here on the page.", afterAgent);
+      sayScripted("No rush — just say yes if you would like the free audit booked, or no if not yet. Or say end call, and the demos stay here on the page.", afterAgent);
       return;
     }
-    speak("I can help with that — tell me what your business does, and what eats your team's time, and I will point you to the right demo. Or say end call to finish.", afterAgent);
+    sayScripted("I can help with that — tell me what your business does, and what eats your team's time, and I will point you to the right demo. Or say end call to finish.", afterAgent);
   }
-
   function startCall() {
     if (state.active) {
       panel.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -696,6 +887,8 @@
     state.active = true;
     state.step = 1;
     state.muted = false;
+    state.thinking = false;
+    state.pendingTurns = 0;
     state.business = "";
     state.demo = null;
     state.noSpeechCount = 0;
@@ -703,8 +896,11 @@
     state.auditExplained = false;
     state.startedAt = Date.now();
     state.exchanges = 0;
+    history = [{ role: "assistant", content: "Hello, this is the Ussari Labs AI agent. Thanks for calling. Before anything else — what does your business do?" }];
     transcriptEl.innerHTML = "";
     auditEl.hidden = true;
+    demoLinkEl.hidden = true;
+    setMode("ai");
     panel.hidden = false;
     fab.textContent = "On call — tap to view";
     muteBtn.textContent = "Mute mic";
@@ -727,6 +923,8 @@
     if (!state.active) return;
     state.active = false;
     state.speaking = false;
+    state.thinking = false;
+    state.pendingTurns = 0;
     try { if (synth) synth.cancel(); } catch (e) {}
     try { if (recog) recog.abort(); } catch (e) {}
     if (listenTimer) clearTimeout(listenTimer);
