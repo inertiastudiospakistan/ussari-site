@@ -391,6 +391,7 @@
     demo: null,
     noSpeechCount: 0,
     unclear: 0,
+    auditExplained: false,
     startedAt: 0,
     exchanges: 0
   };
@@ -464,7 +465,15 @@
       synth.cancel();
       var u = new SpeechSynthesisUtterance(text);
       var voice = pickVoice();
-      if (voice) u.voice = voice;
+      if (!voice) {
+        /* No voice engine in this browser (e.g. headless) — speaking
+           would never end, so run text-only and move on at once. */
+        state.speaking = false;
+        setStatus(state.active ? "ON CALL — TEXT ONLY" : "CALL ENDED");
+        if (onDone) onDone();
+        return;
+      }
+      u.voice = voice;
       u.rate = 0.95;
       u.pitch = 1;
       var done = false;
@@ -478,7 +487,7 @@
       u.onerror = finish;
       /* Safety net: some browsers never fire onend (no voice engine).
          Never leave the call stuck in SPEAKING. */
-      setTimeout(finish, Math.min(30000, 5000 + text.length * 120));
+      setTimeout(finish, Math.min(12000, 3000 + text.length * 60));
       synth.speak(u);
     } catch (e) {
       state.speaking = false;
@@ -649,16 +658,19 @@
       }
       /* Anything else is not a yes or a no — explain, don't loop.
          "I don't have anything to audit" is the common one: the audit
-         is of how the business runs, not of a system they own. */
+         is of how the business runs, not of a system they own.
+         Explain it the first time it comes up, whatever was said before;
+         only end the call if they push back a second time. */
       state.unclear++;
       if (/what.*audit|audit.*what|don'?t have (any|much)|nothing to audit|no.*audit|what should|what do you/.test(lower)) {
-        if (state.unclear >= 2) {
+        if (state.auditExplained) {
           state.step = 5;
           speak("No worries at all — there is nothing for you to prepare. The demos are right here on the page, and the inbox triage one is the closest fit for what you described. Have a look whenever you like. Thanks for calling Ussari Labs.", function () {
             setTimeout(function () { if (state.active) endCall("Call ended. The demos are on this page whenever you want them."); }, 800);
           });
           return;
         }
+        state.auditExplained = true;
         speak("Fair question — the audit is not of a system you own. We look at how your business actually runs day to day — the emails, the calls, the follow-ups — and map where time leaks. Nothing for you to prepare. Want me to book that in, or would you rather just try the inbox demo?", afterAgent);
         return;
       }
@@ -688,6 +700,7 @@
     state.demo = null;
     state.noSpeechCount = 0;
     state.unclear = 0;
+    state.auditExplained = false;
     state.startedAt = Date.now();
     state.exchanges = 0;
     transcriptEl.innerHTML = "";
