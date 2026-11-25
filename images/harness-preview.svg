@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="750" viewBox="0 0 1200 750" role="img" aria-label="Preview render of the harness control center dashboard">
+<rect width="1200" height="750" fill="#FFFFFF"/>
+<rect x="0" y="0" width="1200" height="750" fill="none" stroke="#1A1515" stroke-width="2"/>
+<rect x="0" y="0" width="1200" height="64" fill="#1A1515"/>
+<text x="32" y="41" font-family="monospace" font-size="18" font-weight="700" fill="#FFFFFF">HARNESS</text>
+<text x="180" y="41" font-family="monospace" font-size="14" fill="#A39E9E">/ DASHBOARD - CONTROL CENTER</text>
+<text x="1168" y="41" font-family="monospace" font-size="13" fill="#DC2626" text-anchor="end">● LIVE</text>
+<!-- metric tiles -->
+<rect x="32" y="96" width="264" height="120" fill="#F8F4F4" stroke="#1A1515"/>
+<text x="56" y="136" font-family="monospace" font-size="12" fill="#6E6E73">ENDPOINTS TRACKED</text>
+<text x="56" y="186" font-family="sans-serif" font-size="48" font-weight="700" fill="#1A1515">199</text>
+<rect x="320" y="96" width="264" height="120" fill="#F8F4F4" stroke="#1A1515"/>
+<text x="344" y="136" font-family="monospace" font-size="12" fill="#6E6E73">ENABLED - LIVE-TESTED</text>
+<text x="344" y="186" font-family="sans-serif" font-size="48" font-weight="700" fill="#DC2626">32</text>
+<rect x="608" y="96" width="264" height="120" fill="#F8F4F4" stroke="#1A1515"/>
+<text x="632" y="136" font-family="monospace" font-size="12" fill="#6E6E73">ROUTING</text>
+<text x="632" y="186" font-family="sans-serif" font-size="28" font-weight="700" fill="#1A1515">Score-based</text>
+<rect x="896" y="96" width="272" height="120" fill="#F8F4F4" stroke="#1A1515"/>
+<text x="920" y="136" font-family="monospace" font-size="12" fill="#6E6E73">PROTECTION</text>
+<text x="920" y="186" font-family="sans-serif" font-size="28" font-weight="700" fill="#1A1515">Circuit breakers</text>
+<!-- table -->
+<text x="32" y="268" font-family="sans-serif" font-size="18" font-weight="700" fill="#1A1515">ENABLED PROVIDERS - SAMPLE</text>
+<rect x="32" y="288" width="1136" height="1" fill="#1A1515"/>
+<text x="32" y="326" font-family="monospace" font-size="13" fill="#6E6E73">PROVIDER</text>
+<text x="420" y="326" font-family="monospace" font-size="13" fill="#6E6E73">MODEL</text>
+<text x="820" y="326" font-family="monospace" font-size="13" fill="#6E6E73">STATUS</text>
+<text x="1000" y="326" font-family="monospace" font-size="13" fill="#6E6E73">ADAPTER</text>
+<rect x="32" y="344" width="1136" height="1" fill="#1A1515"/>
+<text x="32" y="382" font-family="sans-serif" font-size="16" fill="#1A1515">OVH AI Endpoints</text>
+<text x="420" y="382" font-family="sans-serif" font-size="16" fill="#1A1515">DeepSeek V4.1 Flash - 1M ctx</text>
+<text x="820" y="382" font-family="monospace" font-size="13" font-weight="700" fill="#DC2626">ENABLED</text>
+<text x="1000" y="382" font-family="sans-serif" font-size="16" fill="#1A1515">OpenAI</text>
+<rect x="32" y="400" width="1136" height="1" fill="#E5E5EA"/>
+<text x="32" y="438" font-family="sans-serif" font-size="16" fill="#1A1515">Cohere</text>
+<text x="420" y="438" font-family="sans-serif" font-size="16" fill="#1A1515">Command A - 256K ctx</text>
+<text x="820" y="438" font-family="monospace" font-size="13" font-weight="700" fill="#DC2626">ENABLED</text>
+<text x="1000" y="438" font-family="sans-serif" font-size="16" fill="#1A1515">OpenAI</text>
+<rect x="32" y="456" width="1136" height="1" fill="#E5E5EA"/>
+<text x="32" y="494" font-family="sans-serif" font-size="16" fill="#1A1515">Inferbase</text>
+<text x="420" y="494" font-family="sans-serif" font-size="16" fill="#1A1515">DeepSeek V4 Flash</text>
+<text x="820" y="494" font-family="monospace" font-size="13" font-weight="700" fill="#DC2626">ENABLED</text>
+<text x="1000" y="494" font-family="sans-serif" font-size="16" fill="#1A1515">OpenAI</text>
+<rect x="32" y="512" width="1136" height="1" fill="#E5E5EA"/>
+<text x="32" y="550" font-family="sans-serif" font-size="16" fill="#1A1515">AnyAPI</text>
+<text x="420" y="550" font-family="sans-serif" font-size="16" fill="#1A1515">Nemotron-3-Ultra-550B - 1M ctx</text>
+<text x="820" y="550" font-family="monospace" font-size="13" font-weight="700" fill="#DC2626">ENABLED</text>
+<text x="1000" y="550" font-family="sans-serif" font-size="16" fill="#1A1515">Anthropic</text>
+<rect x="32" y="568" width="1136" height="1" fill="#1A1515"/>
+<text x="32" y="610" font-family="sans-serif" font-size="15" fill="#1A1515">One model in OpenCode - "harness". All provider and model switching happens inside the gateway.</text>
+<text x="32" y="640" font-family="sans-serif" font-size="15" fill="#1A1515">OpenAI- and Anthropic-compatible adapters. Free tiers keep AI work affordable.</text>
+<!-- preview label -->
+<rect x="0" y="698" width="1200" height="52" fill="#1A1515"/>
+<text x="600" y="722" font-family="monospace" font-size="13" fill="#FFFFFF" text-anchor="middle">PREVIEW RENDER</text>
+<text x="600" y="742" font-family="monospace" font-size="11" fill="#A39E9E" text-anchor="middle">BUILT FROM VERIFIED METRICS (199 TRACKED / 32 ENABLED) - DASHBOARD NOT RUNNING AT CAPTURE TIME</text>
+</svg>

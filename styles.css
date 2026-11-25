@@ -418,3 +418,157 @@ a:focus-visible, .btn:focus-visible {
   .hero-facts div:first-child { border-top: none; }
   .sector-grid { grid-template-columns: 1fr; }
 }
+
+
+/* ---------- Product showcase (slider) ---------- */
+
+.showcase { margin-top: 2.5rem; }
+
+.slider { border: var(--border); background: var(--white); }
+
+.slides { position: relative; }
+
+.slide {
+  display: none;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 0;
+  border-bottom: var(--border);
+}
+
+.slide.is-active { display: grid; }
+
+.slide-media {
+  margin: 0;
+  padding: 32px;
+  border-right: var(--border);
+  background: var(--alabaster);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.slide-media img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: var(--border);
+  background: var(--white);
+}
+
+.slide-media-phone { align-items: center; }
+.slide-media-phone img { max-width: 340px; }
+
+.slide-media figcaption { font-size: 0.92rem; color: var(--charcoal); margin: 0; }
+
+.shot-label {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: var(--charcoal);
+  color: var(--white);
+  padding: 4px 8px;
+  margin-right: 8px;
+}
+
+.shot-label-preview { background: var(--oxide); }
+
+.slide-detail { padding: 36px 32px; }
+.slide-detail h3 { font-size: 1.4rem; margin-bottom: 0.5rem; }
+.slide-no { color: var(--crimson); margin: 0 0 0.75rem; }
+.slide-lede { font-size: 1.05rem; }
+.slide-detail h4 {
+  font-family: var(--font-head);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  font-size: 1rem;
+  margin: 1.25rem 0 0.5rem;
+}
+
+.feature-list { margin: 0 0 1rem; padding-left: 20px; }
+.feature-list li { margin-bottom: 0.35rem; }
+
+.slide-meta { font-size: 0.95rem; margin: 1.25rem 0 0; }
+
+.product-more { margin-top: 1.25rem; border-top: var(--border); padding-top: 1rem; }
+.product-more summary {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 4px 0;
+}
+.product-more summary:hover, .product-more summary:focus-visible { color: var(--crimson); }
+.product-more p { margin: 1rem 0 0; font-size: 0.95rem; }
+
+.slider-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 24px;
+  border-bottom: var(--border);
+}
+
+.slider-btn {
+  font-family: var(--font-head);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  font-size: 0.95rem;
+  background: var(--white);
+  color: var(--charcoal);
+  border: var(--border);
+  border-radius: 0;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+.slider-btn:hover, .slider-btn:focus-visible { background: var(--charcoal); color: var(--white); }
+
+.slider-counter { margin: 0; color: var(--charcoal); }
+
+.slider-nav {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  border-bottom: var(--border);
+}
+
+.slider-dot {
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  text-align: left;
+  background: var(--white);
+  color: var(--charcoal);
+  border: none;
+  border-left: var(--border);
+  border-radius: 0;
+  padding: 16px;
+  cursor: pointer;
+}
+
+.slider-dot:first-child { border-left: none; }
+.slider-dot .mono { color: var(--crimson); margin-right: 6px; }
+.slider-dot:hover, .slider-dot:focus-visible { background: var(--alabaster); }
+.slider-dot.is-active { background: var(--charcoal); color: var(--white); }
+.slider-dot.is-active .mono { color: var(--white); }
+
+.slider-hint { margin: 0; padding: 14px 24px; color: var(--slate); }
+
+@media (max-width: 900px) {
+  .slide.is-active { grid-template-columns: 1fr; }
+  .slide-media { border-right: none; border-bottom: var(--border); padding: 24px; }
+  .slide-detail { padding: 28px 24px; }
+  .slider-nav { grid-template-columns: repeat(2, 1fr); }
+  .slider-dot:nth-child(3) { border-left: none; }
+  .slider-dot:nth-child(n+3) { border-top: var(--border); }
+}
+
+@media (max-width: 560px) {
+  .slider-nav { grid-template-columns: 1fr; }
+  .slider-dot { border-left: none; border-top: var(--border); }
+  .slider-dot:first-child { border-top: none; }
+}

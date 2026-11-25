@@ -149,61 +149,198 @@
     <div class="wrap">
       <p class="mono section-no">04&nbsp;&nbsp;/&nbsp;&nbsp;Work &amp; proof</p>
       <h2 class="section-title">Shipped, not promised.</h2>
-      <p class="section-intro">Work the studio has built and verified. Every number below is measured, not claimed.</p>
+      <p class="section-intro">Work the studio has built and verified. Every number below is measured, not claimed. Five products — use the arrows or the list to move between them.</p>
 
-      <article class="work-item">
-        <div class="work-head">
-          <h3>Vibe-Audit — security auditor for vibe-coded apps</h3>
-          <p class="mono work-tag">OPEN SOURCE&nbsp;&nbsp;/&nbsp;&nbsp;APPLIED AI</p>
-        </div>
-        <p>A security auditor for apps built with Lovable, Bolt and Supabase. It checks 9 areas — stack, secrets, data security, auth, payments, flows, data structure, code quality, deploy — and returns a graded report with plain-English fixes.</p>
-        <ul class="proof-list">
-          <li><span>1,063</span> lines of Python, standard library only</li>
-          <li><span>09</span> check areas, graded 0–100</li>
-          <li><span>$49</span> per audit — first 5 free</li>
-        </ul>
-        <p class="work-links">
-          <a href="https://github.com/inertiastudiospakistan/vibe-audit">github.com/inertiastudiospakistan/vibe-audit</a>
-          <a href="https://dev.to/adil_mehmood_4068cd82d35e/5-security-holes-in-vibe-coded-apps-and-the-one-line-fix-for-each-537o">Read the method on Dev.to</a>
-        </p>
-      </article>
+      <div class="showcase">
+        <div class="slider" id="product-slider" role="region" aria-roledescription="carousel" aria-label="Ussari Labs products">
+          <div class="slides" aria-live="polite">
 
-      <article class="work-item">
-        <div class="work-head">
-          <h3>Hospital management information system</h3>
-          <p class="mono work-tag">CUSTOM SOFTWARE&nbsp;&nbsp;/&nbsp;&nbsp;HEALTHCARE</p>
-        </div>
-        <p>A multi-tenant hospital system: patient registration, OPD visits, billing, lab, pharmacy, HR and reporting — each module toggled per tenant, with dependencies resolved automatically. FastAPI backend, React frontend. Under construction.</p>
-        <ul class="proof-list">
-          <li><span>14</span> modules, dependency-gated per tenant</li>
-          <li><span>02</span> stacks — FastAPI + React</li>
-        </ul>
-      </article>
+            <!-- 01 VIBE-AUDIT -->
+            <article class="slide is-active" data-slide="0" aria-label="1 of 5: Vibe-Audit">
+              <figure class="slide-media">
+                <img src="images/vibe-audit-report.png" alt="Screenshot of a real Vibe-Audit report: a test project scored 0 out of 100, grade F, with 4 critical, 6 high, 9 medium and 10 low findings" width="1280" height="1500" loading="lazy">
+                <figcaption><span class="shot-label">Screenshot — real audit report</span> A generated report for a test project. The full report runs to 33 findings.</figcaption>
+              </figure>
+              <div class="slide-detail">
+                <p class="mono slide-no">Product 01 / 05</p>
+                <h3>Vibe-Audit — security auditor for vibe-coded apps</h3>
+                <p class="mono work-tag">Open source&nbsp;&nbsp;/&nbsp;&nbsp;Applied AI</p>
+                <p class="slide-lede">A security auditor for apps built with Lovable, Bolt and Supabase. It checks the whole app and returns a graded report with plain-English fixes — not a list of warnings a non-developer cannot act on.</p>
+                <p><strong>Who it is for:</strong> anyone who shipped an app built with AI tools — solo builders, small teams, founders who cannot tell whether their app is safe to put in front of users.</p>
+                <h4>What it does</h4>
+                <ul class="feature-list">
+                  <li>Checks 9 areas — stack, secrets, data security, auth, payments, flows, data structure, code quality, deploy</li>
+                  <li>Grades each area 0–100 and the app overall, with a plain-English summary of what is actually wrong</li>
+                  <li>Returns HTML, Markdown and JSON reports, plus copy-paste fix prompts for an AI coding tool</li>
+                  <li>Runs anywhere Python runs — standard library only, no dependencies to install</li>
+                </ul>
+                <ul class="proof-list">
+                  <li><span>1,063</span> lines of Python, standard library only</li>
+                  <li><span>09</span> check areas, graded 0–100</li>
+                  <li><span>$49</span> per audit — first 5 free</li>
+                </ul>
+                <p class="slide-meta"><strong>Status:</strong> Live — open source. <strong>Stack:</strong> Python, standard library only.</p>
+                <p class="work-links">
+                  <a href="https://github.com/inertiastudiospakistan/vibe-audit">github.com/inertiastudiospakistan/vibe-audit</a>
+                  <a href="https://dev.to/adil_mehmood_4068cd82d35e/5-security-holes-in-vibe-coded-apps-and-the-one-line-fix-for-each-537o">Read the method on Dev.to</a>
+                </p>
+                <details class="product-more">
+                  <summary>Full detail — verified results</summary>
+                  <p>Measured on real projects, 23 November 2026: a deliberately broken test project scored <strong>0/100, grade F, with 33 findings</strong> (4 critical, 6 high, 9 medium, 10 low) — including a Supabase service-role key shipped in code and a committed .env file. A clean project scored <strong>100/100, grade A</strong>. Nodefield scored <strong>95/100 locally</strong>. The nine check areas are stack, secrets, data security, auth, payments, flows, data structure, code quality and deploy.</p>
+                </details>
+              </div>
+            </article>
 
-      <article class="work-item">
-        <div class="work-head">
-          <h3>Android apps — built and verified</h3>
-          <p class="mono work-tag">MOBILE&nbsp;&nbsp;/&nbsp;&nbsp;PRODUCT</p>
-        </div>
-        <p>Two native Android apps, built and verified end to end. Play Store listings are in progress.</p>
-        <ul class="proof-list">
-          <li><span>ClearLedger</span> — offline-first expense tracker, build 22, 3.18&nbsp;MB</li>
-          <li><span>Saudi EOS Calculator</span> — fully offline, zero permissions, build 8, 3.35&nbsp;MB</li>
-          <li><span>36</span> target SDK on both builds</li>
-        </ul>
-      </article>
+            <!-- 02 HIMS -->
+            <article class="slide" data-slide="1" aria-label="2 of 5: Hospital management information system" hidden>
+              <figure class="slide-media">
+                <img src="images/hims-frontend.png" alt="Screenshot of the HIMS development frontend sign-in screen" width="1280" height="800" loading="lazy">
+                <figcaption><span class="shot-label">Screenshot — dev frontend, sign-in screen</span> Real capture of the development build. The system is under construction and not in use at the hospital.</figcaption>
+              </figure>
+              <div class="slide-detail">
+                <p class="mono slide-no">Product 02 / 05</p>
+                <h3>Hospital management information system</h3>
+                <p class="mono work-tag">Custom software&nbsp;&nbsp;/&nbsp;&nbsp;Healthcare</p>
+                <p class="slide-lede">A multi-tenant hospital system for Assiraat Hospital, Ahmedpur East — patient registration, OPD visits, billing, lab, HR and reporting, with each module toggled per tenant and dependencies resolved automatically.</p>
+                <p><strong>Who it is for:</strong> Assiraat Hospital — a working hospital that needs one system for registration through billing, instead of paper and disconnected tools.</p>
+                <h4>What it does</h4>
+                <ul class="feature-list">
+                  <li>Patient registration in steps — identity, personal details, next of kin (skippable) — with phone or one national identity accepted</li>
+                  <li>OPD flow: token per doctor per day, doctor assigned at registration, nurse records vitals, lab visits tracked while consulting</li>
+                  <li>Module registry: 14 modules, dependency-gated, auto-enable, and refuse-to-disable with dependents named — super-admin only, audit-recorded</li>
+                  <li>Billing, lab, dialysis, OT and radiology through the specialised service; HR and reporting included</li>
+                </ul>
+                <ul class="proof-list">
+                  <li><span>14</span> modules, dependency-gated per tenant</li>
+                  <li><span>1,695</span> tests passing</li>
+                  <li><span>02</span> stacks — FastAPI + React</li>
+                </ul>
+                <p class="slide-meta"><strong>Status:</strong> Under construction — not deployed or in use at the hospital, no real patient data. Pharmacy is registered only; it has no implementation yet. <strong>Stack:</strong> FastAPI + React, Neon Postgres.</p>
+                <p class="work-links">
+                  <a href="https://hmis-web.pages.dev">View the development frontend</a>
+                </p>
+                <details class="product-more">
+                  <summary>Full detail — what is built and what is not</summary>
+                  <p>Built and verified on the development deployment: the module registry (14 modules, 1,695 tests passing), the registration restructure (sub-tabs, one identity of five, date of birth shown as age, phone-or-identity rule), and the OPD rules the hospital confirmed — lab while consulting, token per doctor per day, mandatory name, phone-or-identity and date of birth. Not built: pharmacy has no API routes, service or UI despite being registered. The system has never held real patient data.</p>
+                </details>
+              </div>
+            </article>
 
-      <article class="work-item">
-        <div class="work-head">
-          <h3>Model-routing infrastructure</h3>
-          <p class="mono work-tag">AI INFRASTRUCTURE</p>
+            <!-- 03 CLEARLEDGER -->
+            <article class="slide" data-slide="2" aria-label="3 of 5: ClearLedger" hidden>
+              <figure class="slide-media slide-media-phone">
+                <img src="images/clearledger-preview.svg" alt="Preview render of the ClearLedger home screen: month totals, spending by category donut, last six months bars, and recent entries" width="390" height="800" loading="lazy">
+                <figcaption><span class="shot-label shot-label-preview">Preview render — not a screenshot</span> Drawn from the real app UI code (colours, layout, labels, seeded data). No emulator screenshot exists yet.</figcaption>
+              </figure>
+              <div class="slide-detail">
+                <p class="mono slide-no">Product 03 / 05</p>
+                <h3>ClearLedger — offline-first expense tracker</h3>
+                <p class="mono work-tag">Mobile&nbsp;&nbsp;/&nbsp;&nbsp;Product</p>
+                <p class="slide-lede">An expense tracker that works entirely offline. No account, no cloud, no subscription — your money stays on your phone.</p>
+                <p><strong>Who it is for:</strong> anyone who wants to know where their money goes without handing their spending to a server.</p>
+                <h4>What it does</h4>
+                <ul class="feature-list">
+                  <li>Monthly totals — spent, income, balance — with a month switcher</li>
+                  <li>Spending by category as a donut, and the last 6 months as bars</li>
+                  <li>Budgets per category, showing what is left or how far over you are</li>
+                  <li>Search, filters and category pills; entries grouped by day; CSV export</li>
+                </ul>
+                <ul class="proof-list">
+                  <li><span>Build 22</span> Release v1.0.0, AAB 3.18&nbsp;MB</li>
+                  <li><span>20/20</span> tests passing</li>
+                  <li><span>36</span> target SDK</li>
+                </ul>
+                <p class="slide-meta"><strong>Status:</strong> Built and verified. Play Store listing in progress — not live on the Play Store yet. <strong>Stack:</strong> Kotlin, MVVM + Repository.</p>
+                <details class="product-more">
+                  <summary>Full detail — inside the app</summary>
+                  <p>Seven fixed categories — Food, Transport, Housing &amp; Bills, Shopping, Health, Entertainment, Other — each with its own colour and icon. Amounts use the device locale currency. The home screen also offers sample data, budgets and an add-entry sheet (expense or income, amount, category, date, note up to 80 characters). Signed with a debug keystore for now; a proper upload key is needed before production.</p>
+                </details>
+              </div>
+            </article>
+
+            <!-- 04 SAUDI EOS CALCULATOR -->
+            <article class="slide" data-slide="3" aria-label="4 of 5: Saudi EOS Calculator" hidden>
+              <figure class="slide-media slide-media-phone">
+                <img src="images/eos-preview.svg" alt="Preview render of the Saudi EOS Calculator: wage and service inputs, reason selection, and the navy result card showing 45,000 SAR" width="390" height="800" loading="lazy">
+                <figcaption><span class="shot-label shot-label-preview">Preview render — not a screenshot</span> Drawn from the real app UI code (navy and amber theme, worked example). No emulator screenshot exists yet.</figcaption>
+              </figure>
+              <div class="slide-detail">
+                <p class="mono slide-no">Product 04 / 05</p>
+                <h3>Saudi EOS Calculator — end-of-service award</h3>
+                <p class="mono work-tag">Mobile&nbsp;&nbsp;/&nbsp;&nbsp;Product</p>
+                <p class="slide-lede">An end-of-service award calculator for workers in Saudi Arabia, built on Articles 84 and 85 of the Saudi Labour Law. Enter your wage and service, get the award — with the working shown.</p>
+                <p><strong>Who it is for:</strong> anyone employed in Saudi Arabia who wants to know what they are owed when employment ends.</p>
+                <h4>What it does</h4>
+                <ul class="feature-list">
+                  <li>Last monthly wage including fixed allowances, in SAR</li>
+                  <li>Length of service by years and months, or by start and end dates</li>
+                  <li>Reason the employment ended — employer-ended, fixed-term ended, or resignation — with Article 85 tiers applied</li>
+                  <li>Full breakdown: first 5 years at half a month per year, after 5 years at a full month, plus a distribution bar; save, copy and share</li>
+                  <li>Arabic toggle, a guide, and a history of past calculations</li>
+                </ul>
+                <ul class="proof-list">
+                  <li><span>Build 8</span> Release v1.0.0, AAB 3.35&nbsp;MB</li>
+                  <li><span>36</span> target SDK</li>
+                  <li><span>0</span> permissions — fully offline</li>
+                </ul>
+                <p class="slide-meta"><strong>Status:</strong> Built and verified. Play Store listing in progress — not live on the Play Store yet. <strong>Stack:</strong> Kotlin / Jetpack Compose, MVI, navy + amber.</p>
+                <details class="product-more">
+                  <summary>Full detail — worked example</summary>
+                  <p>The app opens pre-filled with the worked example: a 10,000 SAR monthly wage, 7 years of service, employment ended by the employer — the award is <strong>45,000 SAR</strong> (25,000 for the first 5 years, 20,000 for the 2 years after). Resignation applies Article 85 tiers: none under 2 years, one third from 2 to under 5 years, two thirds from 5 to under 10 years, full at 10+ years. The result is an estimate, not legal advice — the app says so on screen.</p>
+                </details>
+              </div>
+            </article>
+
+            <!-- 05 HARNESS -->
+            <article class="slide" data-slide="4" aria-label="5 of 5: Model-routing infrastructure" hidden>
+              <figure class="slide-media">
+                <img src="images/harness-preview.svg" alt="Preview render of the harness control center dashboard: 199 endpoints tracked, 32 enabled, and a sample of enabled providers" width="1200" height="750" loading="lazy">
+                <figcaption><span class="shot-label shot-label-preview">Preview render — not a screenshot</span> Built from the verified metrics (199 tracked / 32 enabled). The dashboard server was not running when this page was built, so no live capture exists.</figcaption>
+              </figure>
+              <div class="slide-detail">
+                <p class="mono slide-no">Product 05 / 05</p>
+                <h3>Model-routing infrastructure — the harness</h3>
+                <p class="mono work-tag">AI infrastructure</p>
+                <p class="slide-lede">A routing gateway that puts free AI models behind one interface. In OpenCode there is exactly one model — “harness” — and all provider and model switching happens inside the gateway.</p>
+                <p><strong>Who it is for:</strong> the studio itself, first — it is how Ussari keeps AI work affordable — and any team that needs many models without paying for every call.</p>
+                <h4>What it does</h4>
+                <ul class="feature-list">
+                  <li>Score-based routing across providers, with circuit breakers that cut off failing endpoints</li>
+                  <li>OpenAI- and Anthropic-compatible adapters, plus a /dashboard control center</li>
+                  <li>Profiles and SQLite state; every endpoint is live-tested before it is enabled</li>
+                  <li>Routes around rate limits and outages instead of failing on the first provider</li>
+                </ul>
+                <ul class="proof-list">
+                  <li><span>199</span> endpoints tracked</li>
+                  <li><span>32</span> enabled and live-tested</li>
+                </ul>
+                <p class="slide-meta"><strong>Status:</strong> Live — internal infrastructure. <strong>Stack:</strong> Python, OpenAI / Anthropic-compatible API.</p>
+                <details class="product-more">
+                  <summary>Full detail — how it is used</summary>
+                  <p>The harness is the studio’s working advantage: client AI work runs through free tiers where they are genuinely free, and the gateway picks the best available model per task. Enabled providers verified live include OVH AI Endpoints (DeepSeek V4.1 Flash, 1M context), Cohere (Command A, 256K), Inferbase and AnyAPI (Nemotron-3-Ultra, 1M). No token volume or revenue is claimed for it.</p>
+                </details>
+              </div>
+            </article>
+
+          </div>
+
+          <div class="slider-controls">
+            <button class="slider-btn" type="button" id="slider-prev" aria-label="Previous product">&#8592; Prev</button>
+            <p class="mono slider-counter" id="slider-counter" aria-hidden="true">01 / 05</p>
+            <button class="slider-btn" type="button" id="slider-next" aria-label="Next product">Next &#8594;</button>
+          </div>
+
+          <nav class="slider-nav" aria-label="Choose a product">
+            <button type="button" class="slider-dot is-active" data-go="0" aria-current="true"><span class="mono">01</span> Vibe-Audit</button>
+            <button type="button" class="slider-dot" data-go="1"><span class="mono">02</span> Hospital system</button>
+            <button type="button" class="slider-dot" data-go="2"><span class="mono">03</span> ClearLedger</button>
+            <button type="button" class="slider-dot" data-go="3"><span class="mono">04</span> EOS Calculator</button>
+            <button type="button" class="slider-dot" data-go="4"><span class="mono">05</span> Harness</button>
+          </nav>
+          <p class="mono slider-hint">Use the arrows, the list above, or the left / right keys when the showcase is focused. It never advances on its own.</p>
         </div>
-        <p>A routing gateway that puts free AI models behind one interface — score-based routing, circuit breakers, and OpenAI- and Anthropic-compatible adapters. It is how the studio keeps AI work affordable.</p>
-        <ul class="proof-list">
-          <li><span>199</span> endpoints tracked</li>
-          <li><span>32</span> enabled and live-tested</li>
-        </ul>
-      </article>
+      </div>
+
     </div>
   </section>
 
@@ -251,6 +388,49 @@
     <p class="mono">© 2026 USSARI LABS</p>
   </div>
 </footer>
+
+<script>
+(function () {
+  var slider = document.getElementById('product-slider');
+  if (!slider) return;
+  var slides = Array.prototype.slice.call(slider.querySelectorAll('.slide'));
+  var dots = Array.prototype.slice.call(slider.querySelectorAll('.slider-dot'));
+  var counter = document.getElementById('slider-counter');
+  var prev = document.getElementById('slider-prev');
+  var next = document.getElementById('slider-next');
+  var total = slides.length;
+  var current = 0;
+
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+
+  function show(index, focusSlide) {
+    current = ((index % total) + total) % total;
+    slides.forEach(function (slide, i) {
+      var active = i === current;
+      slide.classList.toggle('is-active', active);
+      if (active) { slide.removeAttribute('hidden'); } else { slide.setAttribute('hidden', ''); }
+    });
+    dots.forEach(function (dot, i) {
+      var active = i === current;
+      dot.classList.toggle('is-active', active);
+      if (active) { dot.setAttribute('aria-current', 'true'); } else { dot.removeAttribute('aria-current'); }
+    });
+    if (counter) counter.textContent = pad(current + 1) + ' / ' + pad(total);
+    if (focusSlide) slides[current].setAttribute('tabindex', '-1'), slides[current].focus();
+  }
+
+  prev.addEventListener('click', function () { show(current - 1); });
+  next.addEventListener('click', function () { show(current + 1); });
+  dots.forEach(function (dot) {
+    dot.addEventListener('click', function () { show(parseInt(dot.getAttribute('data-go'), 10)); });
+  });
+  slider.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowLeft') { e.preventDefault(); show(current - 1); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); show(current + 1); }
+  });
+  show(0);
+})();
+</script>
 
 </body>
 </html>
