@@ -340,6 +340,22 @@ a:focus-visible, .btn:focus-visible {
 }
 .work-links a:hover, .work-links a:focus-visible { color: var(--crimson); }
 
+/* ---------- AI Automation ---------- */
+
+#automation .service-grid { margin-top: 2rem; }
+.automation-subhead {
+  font-size: 1.3rem;
+  margin: 3rem 0 0.75rem;
+}
+#automation .section-intro { margin-bottom: 0; }
+.automation-links { flex-direction: column; gap: 8px; }
+.automation-links a { color: var(--white); }
+.automation-links a:hover, .automation-links a:focus-visible { color: var(--crimson); }
+.automation-offer { border-color: var(--slate); margin-top: 2rem; }
+.automation-offer li { border-left-color: var(--slate); color: var(--alabaster); }
+.automation-offer li:first-child { border-left: none; }
+.automation-cta { margin: 2.5rem 0 0; }
+
 /* ---------- Founder ---------- */
 
 .founder-grid {
