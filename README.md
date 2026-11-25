@@ -9,17 +9,16 @@ rounding, no shadows.
 
 | File | Purpose |
 | --- | --- |
-| `images/` | One kept product image: the cropped Vibe-Audit banner (see below). No preview renders, no other screenshots. |
-| `index.html` | The whole site: header, auto hero slider, hero intro, pillars, about, services, sectors, work/proof, founder, contact |
+| `images/` | Removed 25 Nov 2026 with the slider — no images on the site now. |
+| `index.html` | The whole site: header, hero intro, pillars, about, services, sectors, work/proof, founder, contact |
 | `styles.css` | All styling. Tokens are the five guideline colours; nothing else |
 | `mark.svg` | The three-block "U" mark (favicon). Also inlined in the header/footer |
 
-## Hero slider + Work section (rebuilt 25 Nov 2026 on user feedback)
+## Work section + slider history (25 Nov 2026)
 
-- The old giant Work carousel is gone. The top of the page is now a compact **auto hero slider** (420px desktop / 480px mobile, auto-advances every 5s, pauses on hover/focus and when the tab is hidden, no auto-advance with prefers-reduced-motion, arrows + dots inside the frame, left/right keyboard support). One slide per product; only Vibe-Audit has an image.
+- The old giant Work carousel is gone. The Work section is **compact grid cards** (name, one line, 2–3 verified numbers, links, expandable Full detail) with no images and no prev/next.
 - **Removed 25 Nov 2026** (user: "remove the shitty ones"): `images/clearledger-preview.svg`, `images/eos-preview.svg`, `images/harness-preview.svg` (labelled preview renders that looked fake) and `images/hims-frontend.png` (just a sign-in screen). All four files deleted from the repo — do not re-add any preview render or fake screenshot.
-- **Kept, cropped:** `images/vibe-audit-banner.png` — the real audit-report screenshot cropped to 1200×500 (score card + plain-English summary only), shown on the Vibe-Audit hero slide only. The tall 1280×1500 original was deleted.
-- The Work section below is now **compact grid cards** (name, one line, 2–3 verified numbers, links, expandable Full detail) with no images and no prev/next.
+- **Slider removed 25 Nov 2026** (user: "remove the slider"): the compact auto hero slider added earlier the same day was removed entirely — markup, script, CSS and its `images/vibe-audit-banner.png` (now orphaned) are all deleted. The page opens straight on the static hero intro. Do not re-add a slider without the user asking for one.
 
 ## Brand tokens (definitive — do not change without the founders)
 
