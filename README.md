@@ -47,9 +47,10 @@ On light surfaces the blocks are Asphalt Charcoal; on dark surfaces, white
 - **No phone number.** The number on the visiting card (+92 300 0000000) is a
   placeholder. Leave phone off until the user confirms a real number.
 - **Adil Warraich is ONE of three founders** — founder/developer and AI
-  engineering lead. Never presented as sole founder. The other two founders'
-  names and roles are unknown; the site says "three friends, one structure"
-  and adds their profiles only when confirmed.
+  engineering lead. Never presented as sole founder. The other two founders
+  are **Qazi Shafee** (business — holds the business end) and **Kamran Khan**
+  (software architecture — handles the software side), confirmed by the user
+  25 Nov 2026; all three are now listed on the site.
 - **No invented claims.** Every number on the site is verified: vibe-audit
   (1,063 lines, stdlib-only, 9 areas, $49 after 5 free), Android builds
   (ClearLedger build-22, Saudi EOS Calculator build-8, targetSdk 36),
@@ -83,10 +84,9 @@ Do not deploy, create a repo, or register the domain until the user approves.
 
 ## Open questions (need the user / founders)
 
-1. The other two founders' names and roles.
-2. Who registers ussari.dev — approval to buy at Cloudflare ($8.20 first year).
-3. Whether the studio is formally registered (company registration, tax status).
-4. Any existing site or social accounts under the Ussari name.
-5. A real phone number, if the studio wants one published.
-6. Whether hello@ussari.dev should be activated (via Cloudflare Email Routing)
+1. Who registers ussari.dev — approval to buy at Cloudflare ($8.20 first year).
+2. Whether the studio is formally registered (company registration, tax status).
+3. Any existing site or social accounts under the Ussari name.
+4. A real phone number, if the studio wants one published.
+5. Whether hello@ussari.dev should be activated (via Cloudflare Email Routing)
    once the domain is owned.
