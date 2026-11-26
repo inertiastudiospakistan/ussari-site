@@ -462,15 +462,25 @@
     synth.addEventListener("voiceschanged", function () { cachedVoice = null; pickVoice(); });
   }
 
+  /* Stop the mic before the agent speaks: without this, the mic hears
+     the agent's own voice coming out of the speakers and feeds it back
+     as a "user" turn, so the agent ends up talking to itself. */
+  function stopListening() {
+    if (listenTimer) { clearTimeout(listenTimer); listenTimer = null; }
+    if (recog) { try { recog.abort(); } catch (e) {} }
+  }
+
   function speak(text, onDone) {
     lastAgentLine = text;
     addLine("agent", text);
+    state.speaking = true;
+    stopListening();
     if (!synth || state.muted) {
+      state.speaking = false;
       setStatus(state.active ? "ON CALL — TEXT ONLY" : "CALL ENDED");
       if (onDone) onDone();
       return;
     }
-    state.speaking = true;
     setStatus("SPEAKING…");
     try {
       synth.cancel();
@@ -508,6 +518,7 @@
 
   function listen() {
     if (!state.active || state.muted || !recogSupported) return;
+    if (state.speaking || state.thinking) return;
     if (!recog) {
       try {
         recog = new Recog();
@@ -520,6 +531,10 @@
         return;
       }
       recog.onresult = function (ev) {
+        /* A result arriving while the agent is speaking or thinking is
+           the agent's own voice echoing back through the mic — never a
+           real turn. The mic is only live while listening. */
+        if (state.speaking || state.thinking) return;
         var text = "";
         for (var i = ev.resultIndex; i < ev.results.length; i++) {
           if (ev.results[i].isFinal) text += ev.results[i][0].transcript;
@@ -549,7 +564,7 @@
         if (state.active && !state.muted) listenSoon();
       };
       recog.onend = function () {
-        if (state.active && !state.muted && !state.speaking) listenSoon();
+        if (state.active && !state.muted && !state.speaking && !state.thinking) listenSoon();
       };
     }
     try {
@@ -563,7 +578,10 @@
   var listenTimer = null;
   function listenSoon() {
     if (listenTimer) clearTimeout(listenTimer);
-    listenTimer = setTimeout(listen, 400);
+    /* 600ms tail delay: let the agent's voice die away from the room
+       before the mic opens again, or the first thing it hears is the
+       agent's own last word. */
+    listenTimer = setTimeout(listen, 600);
   }
 
   function afterAgent() {
@@ -771,8 +789,35 @@
     return "Shall I book you in for the free AI audit? Just say yes or no.";
   }
 
+  /* Echo guard: the mic can still catch a fragment of the agent's own
+     speech (speaker bleed). If what "the user" just said is really the
+     agent's last line — or mostly words from it — drop it silently: no
+     transcript line, no LLM call. Short replies ("yes", "plumbing") are
+     never dropped, so real answers always get through. */
+  function normEcho(s) {
+    return s.toLowerCase().replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+  }
+  function isEcho(text) {
+    if (!lastAgentLine) return false;
+    var u = normEcho(text);
+    var a = normEcho(lastAgentLine);
+    if (!u || !a) return false;
+    if (u.length >= 12 && (a.indexOf(u) !== -1 || u.indexOf(a) !== -1)) return true;
+    var uw = u.split(" ");
+    if (uw.length >= 4) {
+      var aw = a.split(" ");
+      var hits = 0;
+      for (var i = 0; i < uw.length; i++) {
+        if (aw.indexOf(uw[i]) !== -1) hits++;
+      }
+      if (hits / uw.length >= 0.75) return true;
+    }
+    return false;
+  }
+
   function handleUser(text) {
     if (!state.active) return;
+    if (isEcho(text)) return;   // mic caught the agent's own voice — ignore
     state.exchanges++;
     addLine("you", text);
     var lower = text.toLowerCase();
