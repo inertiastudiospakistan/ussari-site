@@ -400,6 +400,7 @@
     aiMode: true,
     business: "",
     demo: null,
+    customBuild: null,   // a named system the caller wants built (HMIS, custom app…)
     noSpeechCount: 0,
     unclear: 0,
     auditExplained: false,
@@ -620,7 +621,7 @@
     "Mistral-Small-3.2-24B-Instruct-2506",
     "gpt-oss-120b"
   ];
-  var LLM_SYSTEM = "You are the Ussari Labs AI agent, on a live demo call with a business owner. You are an AI, never claim to be human. Reply in short spoken words: 1 to 3 sentences, plain language, no lists, no markdown. Find out what their business does, what eats their team's time, and how they handle it today. If they go off topic, answer them naturally and steer gently back to their business. Do not pitch the free audit in every reply — offer it only when it fits, after you have found their bottleneck, and only book it if they say yes. Suggest a fitting Ussari demo by name when it fits: the AI receptionist for missed calls and booking, inbox and CRM triage for emails and messages, SEO automation for Google and rankings. All three can be tried right here on this page. If they ask what the audit is, explain it is a look at how their business actually runs day to day, nothing to prepare. Never invent clients, results, testimonials or prices. The only numbers you may quote are the $500 pilot (50% upfront, 2 weeks) and voice usage about $0.13 to $0.14 a minute, paid by the client. If the caller agrees to the audit, end your reply with [SHOW_AUDIT]. If the call should close, end with [END_CALL]. When you recommend a demo, end with [DEMO: receptionist] or [DEMO: seo] or [DEMO: triage]. The bracketed tokens are instructions for the page, never say them aloud.";
+  var LLM_SYSTEM = "You are the Ussari Labs AI agent, on a live demo call with a business owner. You are an AI, never claim to be human. Reply in short spoken words: 1 to 3 sentences, plain language, no lists, no markdown. Find out what their business does, what eats their team's time, and how they handle it today. If they go off topic, answer them naturally and steer gently back to their business. Do not pitch the free audit in every reply — offer it only when it fits, after you have found their bottleneck, and only book it if they say yes. Suggest a fitting Ussari demo by name when it fits: the AI receptionist for missed calls and booking, inbox and CRM triage for emails and messages, SEO automation for Google and rankings. All three can be tried right here on this page. If the caller asks for a specific system or build — for example a hospital management system (HMIS), a custom app, a CRM, or any software they want built — do not redirect them to the receptionist, inbox or SEO demos. That is a custom-build lead: ask what it must do, who will use it, and what they use today, then offer the free audit as the scoping step. If they ask what the audit is, explain it is a look at how their business actually runs day to day, nothing to prepare. Never invent clients, results, testimonials or prices. The only numbers you may quote are the $500 pilot (50% upfront, 2 weeks) and voice usage about $0.13 to $0.14 a minute, paid by the client. If the caller agrees to the audit, end your reply with [SHOW_AUDIT]. If the call should close, end with [END_CALL]. When you recommend a demo, end with [DEMO: receptionist] or [DEMO: seo] or [DEMO: triage]. The bracketed tokens are instructions for the page, never say them aloud.";
   var history = [];   // {role, content} — user + assistant turns, last ~10
 
   function lastUserText() {
@@ -765,6 +766,19 @@
     triage: { name: "the inbox and CRM triage", link: "demos/triage/", blurb: "it reads every message, sorts it, drafts the reply, and files it." }
   };
 
+  /* A caller naming a specific system they want built — a hospital
+     system, a custom app, a CRM — is a custom-build lead, not a
+     receptionist/inbox/SEO lead. Never pivot them to a demo they did
+     not ask for; scope it, then offer the audit as the scoping step. */
+  function detectCustomBuild(text) {
+    var t = text.toLowerCase();
+    if (/\bhmis\b|hospital management|hospital system|patient management|\bemr\b|\behr\b|clinic management/.test(t)) return "hospital management system";
+    var m = t.match(/\b(hospital|clinic|pharmacy|school|university|hotel|restaurant)\b/);
+    if (/\b(build|need|want|looking for)\b.{0,40}\b(system|software|app|platform|portal|dashboard)\b/.test(t)) return "custom system";
+    if (m) return "system for your " + m[1];
+    return null;
+  }
+
   function detectDemo(text) {
     var t = text.toLowerCase();
     if (/miss(ed)?\s*call|phone|answer(ing)?\s*(the\s*)?phone|call(ers?|ing)|booking|appointment|schedule|reception/.test(t)) return "receptionist";
@@ -860,6 +874,15 @@
       sayScripted("Hey, good to hear from you. " + currentQuestion(), afterAgent);
       return;
     }
+    /* The caller named a system they want built — stop the generic
+       bottleneck script and scope their build instead. */
+    var build = detectCustomBuild(text);
+    if (build && state.step < 4) {
+      state.customBuild = build;
+      state.step = 3;
+      sayScripted("A brand-new " + build + " is exactly the kind of custom build we do. Let me scope it properly. How many people would use it day to day — and what do you use today, paper records or an old system?", afterAgent);
+      return;
+    }
     if (state.step === 0) {
       state.step = state.business ? 2 : 1;
       sayScripted(state.business
@@ -886,6 +909,10 @@
     if (state.step === 3) {
       state.step = 4;
       state.unclear = 0;
+      if (state.customBuild) {
+        sayScripted("That helps. The right next step is the free AI audit — we map what the " + state.customBuild + " has to do, who uses it, and what it replaces, then you get a fixed scope and price. Shall I book that in? Just say yes or no.", afterAgent);
+        return;
+      }
       var d = DEMOS[state.demo];
       sayScripted("Then here is the fit: " + d.name + " — " + d.blurb + " You can try it right now on this page. Shall I book you in for the free AI audit, so we can map the rest? Just say yes or no.", afterAgent);
       return;
@@ -936,6 +963,7 @@
     state.pendingTurns = 0;
     state.business = "";
     state.demo = null;
+    state.customBuild = null;
     state.noSpeechCount = 0;
     state.unclear = 0;
     state.auditExplained = false;
